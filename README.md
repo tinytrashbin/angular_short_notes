@@ -395,8 +395,145 @@ export class Example1Component implements OnInit {
 
 ### 10). Subcomponents, passing values to subcomponents
 
-Coming Soon.
+**[Angular-14]**: How to use a subcomponent in HTML of another component:
+
+```HTML
+<app-sub-example></app-sub-example>
+```
+
+**[Angular-14]**: How to pass values to a subcomponent:
+
+```HTML
+<app-sub-example [name]="name" [email]="email" ></app-sub-example>
+```
+
+**In ReactJS**: How to pass values to a sub component.
+
+```JSX
+<AppSubExample name={name} email={email} />
+```
+
+**[Angular-14]**: How to use the values passed in subcomponent:
+
+**File: sub-example.component.ts**
+
+```ts
+export class SubExampleComponent implements OnInit {
+  @Input("name") name!: string
+  @Input("email") email!: string
+
+  constructor() { }
+  ngOnInit(): void {
+  }
+}
+```
+
+**File: sub-example.component.html**
+
+```HTML
+<p>My name = {{name}}, and email = {{email}}</p>
+```
+
+**In ReactJS**: How to use the values passed in subcomponent:
+
+```JSX
+function AppSubExample({name, email}) {
+  return (<p>My name = {name}, and email = {email}</p>);
+}
+```
 
 -----------------------------------
 
+### 11). Passing EventEmitter to subcomponents
+
+EventEmitter is used by child components for changing state variables of parent component. In ReactJS we pass callback/function to the child component for this purpose.
+
+For example, we pass `deleteUser` function (callback), which is defined in
+the parent component but called in child component.
+
+```JSX
+// ReactJS
+function AppSubExample({name, email, deleteUser}) {
+  ...
+}
+```
+
+In Angular-14:
+
+**File: parent.component.html**
+
+```HTML
+<app-sub-example [name]="name" (deleteUser)="deleteUser($event)" ></app-sub-example>
+```
+
+**File: parent.component.ts**
+
+```ts
+  deleteUser(name: string): void {
+    ...
+  }
+```
+
+**File: child.component.html**
+
+```HTML
+<input [(ngModel)]="name" >
+<br>
+<button (click)="deleteUser.emit(name)" >Delete</button>
+```
+
+**File: child.component.ts**
+
+```ts
+import { Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
+
+...
+export class SubExampleComponent implements OnInit {
+  @Input("name") name!: string
+  @Output("deleteUser") deleteUser = new EventEmitter<string>();
+
+  constructor() { }
+  ngOnInit(): void { }
+}
+```
+
+Note: Event emitters should be initialized to `new EventEmitter<string>()`
+
+**In ReactJS**
+
+
+```JSX
+function AppSubExample({deleteUser}) {
+  return (
+    <p>
+      <button onClick={() => deleteUser("Abc")} ></button>
+    </p>)
+}
+
+function MainFunc() {
+  const deleteUser = function(name) {
+    ...
+  }
+  return <p><AppSubExample deleteUser={deleteUser} /></p>
+}
+```
+
+Differences:
+
+|  React  | Angular-14
+| -------- | -----------
+| Callbacks are passed like other variables | Passed differently
+| Syntax: `deleteUser={deleteUser}` | Syntax: `(deleteUser)="deleteUser($event)"`
+| Callback functions can take any number of args | Can take only 1 argument.
+| Used in subcomponents like other variables | Used in subcomponent with `@output` annotation
+| Eg: `function AppSubExample({deleteUser})` | Eg: `@Output("deleteUser") deleteUser = new EventEmitter<string>()`
+| Called directly as `deleteUser("Abc")` | Called `.emit` on it, eg: `deleteUser.emit("Abc")`
+
+Note:
+
+1. In ` = new EventEmitter<string>();` , the `string` is the data type of input param. It will be different for different callbacks.
+
+2. Since event-emitter can take only 1 argument, we must call it with tuple or dictionary if we need to pass multiple parameters.
+
+-----------------------------------
 
